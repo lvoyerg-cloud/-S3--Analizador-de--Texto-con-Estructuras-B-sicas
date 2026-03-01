@@ -1,0 +1,76 @@
+import os import subprocess
+
+class TextAnalyzer: def init(self, text: str): if not text or not
+text.strip(): raise ValueError(“El texto no puede estar vacío.”)
+self.original_text = text self.normalized_text = “” self.tokens = []
+self.counts = {} self.unique_tokens = set()
+
+    def normalize_text(self, text: str) -> str:
+        punctuation = ".,;:!?()[]{}\"'"
+        text = text.lower()
+        cleaned = "".join(char for char in text if char not in punctuation)
+        return " ".join(cleaned.split())
+
+    def tokenize(self, text: str) -> list:
+        return text.split()
+
+    def analyze(self):
+        self.normalized_text = self.normalize_text(self.original_text)
+        self.tokens = self.tokenize(self.normalized_text)
+
+        for token in self.tokens:
+            self.counts[token] = self.counts.get(token, 0) + 1
+
+        self.unique_tokens = set(self.tokens)
+
+    def report(self):
+        total_tokens = len(self.tokens)
+        unique_count = len(self.unique_tokens)
+
+        print("\n===== REPORTE =====")
+        print("Total de tokens:", total_tokens)
+        print("Tokens únicos:", unique_count)
+
+        print("\nTop 10 tokens más frecuentes:")
+        sorted_tokens = sorted(self.counts.items(), key=lambda x: x[1], reverse=True)
+        for token, count in sorted_tokens[:10]:
+            print(token, "->", count)
+
+        if total_tokens > 0:
+            avg_length = sum(len(t) for t in self.tokens) / total_tokens
+            print("\nLongitud promedio de palabra:", round(avg_length, 2))
+
+        if self.tokens:
+            max_len = max(len(t) for t in self.tokens)
+            min_len = min(len(t) for t in self.tokens)
+
+            longest = [t for t in self.unique_tokens if len(t) == max_len]
+            shortest = [t for t in self.unique_tokens if len(t) == min_len]
+
+            print("Palabra(s) más larga(s):", longest)
+            print("Palabra(s) más corta(s):", shortest)
+
+    def query(self, word: str):
+        word = word.lower()
+        total = len(self.tokens)
+
+        print("\n===== CONSULTA DE PALABRA =====")
+
+        if word not in self.counts:
+            print("Palabra consultada:", word)
+            print("La palabra no aparece en el texto.")
+            return
+
+        freq = self.counts[word]
+        percentage = (freq / total) * 100 if total > 0 else 0
+
+        print("Palabra consultada:", word)
+        print("Frecuencia:", freq)
+        print("Porcentaje:", round(percentage, 2), "%")
+
+        if freq == 1:
+            print("Clasificación: RARA")
+        elif freq >= 5:
+            print("Clasificación: COMÚN")
+        else:
+            print("Clasificación: Moderada")
